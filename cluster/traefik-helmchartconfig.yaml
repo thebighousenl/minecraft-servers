@@ -1,0 +1,17 @@
+# Extra Traefik entrypoints for Minecraft Bedrock servers.
+# One UDP port per server; the name must be mc-<server> to match servers/<server>.
+# Applying a change redeploys Traefik (brief HTTP ingress interruption).
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      mc-daan:
+        port: 19332
+        exposedPort: 19332
+        protocol: UDP
+        expose:
+          default: true

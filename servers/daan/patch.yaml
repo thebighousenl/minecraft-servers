@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bedrock
+spec:
+  template:
+    spec:
+      containers:
+        - name: bedrock
+          env:
+            - name: SERVER_NAME
+              value: Daan
+            - name: LEVEL_NAME
+              value: Daan
+            - name: GAMEMODE
+              value: adventure
+            - name: DIFFICULTY
+              value: peaceful
+            - name: ALLOW_CHEATS
+              value: "true"
+            - name: MAX_PLAYERS
+              value: "10"
+            - name: ONLINE_MODE
+              value: "true"
+            - name: ALLOW_LIST
+              value: "false"
+            - name: DEFAULT_PLAYER_PERMISSION_LEVEL
+              value: operator
+            - name: LEVEL_SEED
+              value: "888882571486312935"

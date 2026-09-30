@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bedrock
+  labels:
+    app.kubernetes.io/name: bedrock
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bedrock
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bedrock
+    spec:
+      containers:
+        - name: bedrock
+          image: itzg/minecraft-bedrock-server:latest
+          imagePullPolicy: Always
+          tty: true
+          stdin: true
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: VERSION
+              value: LATEST
+          ports:
+            - name: bedrock
+              containerPort: 19132
+              protocol: UDP
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: bedrock-data

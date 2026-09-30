@@ -1,0 +1,4 @@
+[
+  {"op": "add", "path": "/rules/-", "value": {"apiGroups": ["traefik.io"], "resources": ["ingressrouteudps"], "verbs": ["get", "list", "watch", "create", "patch", "update", "delete"]}},
+  {"op": "add", "path": "/rules/-", "value": {"apiGroups": ["helm.cattle.io"], "resources": ["helmchartconfigs"], "verbs": ["get", "list", "watch", "create", "patch", "update"]}}
+]

@@ -1,0 +1,34 @@
+version: 49
+jobs:
+- name: deploy servers
+  steps:
+  - type: CheckoutStep
+    name: checkout
+    cloneCredential:
+      type: DefaultCredential
+    withLfs: false
+    withSubmodules: false
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
+    name: apply manifests
+    runInContainer: true
+    image: bitnami/kubectl:latest
+    interpreter:
+      type: DefaultInterpreter
+      commands: |
+        bash scripts/deploy.sh
+    runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
+  jobExecutor: cluster-deployer
+  triggers:
+  - type: BranchUpdateTrigger
+    branches: main
+    paths: base/** servers/** cluster/** scripts/deploy.sh
+    userMatch: anyone
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600

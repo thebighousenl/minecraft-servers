@@ -15,3 +15,9 @@ spec:
         protocol: UDP
         expose:
           default: true
+      mc-gaitie:
+        port: 19132
+        exposedPort: 19132
+        protocol: UDP
+        expose:
+          default: true

@@ -8,6 +8,7 @@ namespace `minecraft-servers`. Servers use the
 
 | Server | World | Mode | Port | Connect to | Migrated from |
 |---|---|---|---|---|---|
+| `gaitie` | GaitieDeBoer1 | survival | 19132 | `13.140.175.141` (default port) | LinuxGSM `mcbserver` |
 | `daan` | Daan | adventure | 19332 | `13.140.175.141:19332` | LinuxGSM `mcserverdaan` |
 
 Xbox players use BedrockConnect (custom DNS) and enter the address and port from this table.

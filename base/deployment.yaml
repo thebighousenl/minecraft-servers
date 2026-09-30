@@ -27,6 +27,10 @@ spec:
               value: "TRUE"
             - name: VERSION
               value: LATEST
+            # BDS defaults to NetherNet (TCP + WebRTC UDP range). RakNet keeps one UDP port per
+            # server, which the Traefik UDP entrypoints and BedrockConnect rely on.
+            - name: TRANSPORT
+              value: raknet
           ports:
             - name: bedrock
               containerPort: 19132

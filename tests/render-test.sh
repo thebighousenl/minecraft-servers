@@ -45,6 +45,7 @@ for dir in "${servers[@]}"; do
   env_of() { jq -r --arg n "$1" '.spec.template.spec.containers[0].env[] | select(.name == $n) | .value' <<<"$deploy"; }
   check "$name EULA" "TRUE" "$(env_of EULA)"
   check "$name VERSION" "LATEST" "$(env_of VERSION)"
+  check "$name TRANSPORT" "raknet" "$(env_of TRANSPORT)"
   [[ -n "$(env_of LEVEL_NAME)" ]] && pass "$name LEVEL_NAME set" || fail "$name LEVEL_NAME not set"
 
   check "$name entrypoint" "mc-$name" "$(jq -r '.spec.entryPoints | join(",")' <<<"$iru")"

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bedrock
+spec:
+  template:
+    spec:
+      containers:
+        - name: bedrock
+          env:
+            - name: SERVER_NAME
+              value: Kontgat
+            - name: LEVEL_NAME
+              value: Kontgat
+            - name: GAMEMODE
+              value: survival
+            # The old server had "peacefull" (typo), which Bedrock treated as easy.
+            - name: DIFFICULTY
+              value: easy
+            - name: ALLOW_CHEATS
+              value: "true"
+            - name: MAX_PLAYERS
+              value: "10"
+            - name: ONLINE_MODE
+              value: "true"
+            - name: ALLOW_LIST_USERS
+              value: DecidingTiara99:2535442332074978,PancakeNL8261:2533274926013414,Gjdeb:2533274863407504,BeastSqueez:2535444807168366
+            - name: DEFAULT_PLAYER_PERMISSION_LEVEL
+              value: operator
+            - name: LEVEL_SEED
+              value: "-4361528937055201680"

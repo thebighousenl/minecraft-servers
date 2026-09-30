@@ -10,6 +10,9 @@ namespace `minecraft-servers`. Servers use the
 |---|---|---|---|---|---|
 | `gaitie` | GaitieDeBoer1 | survival | 19132 | `13.140.175.141` (default port) | LinuxGSM `mcbserver` |
 | `daan` | Daan | adventure | 19332 | `13.140.175.141:19332` | LinuxGSM `mcserverdaan` |
+| `kontgat` | Kontgat | survival | 19134 | `13.140.175.141:19134` | LinuxGSM `mcbcreative2` |
+| `creative` | Main | creative | 19232 | `13.140.175.141:19232` | LinuxGSM `mcbcreative` |
+| `plaskutje` | anuskontklepje | creative (flat) | 19140 | `13.140.175.141:19140` | LinuxGSM `mcbflat1` |
 
 Xbox players use BedrockConnect (custom DNS) and enter the address and port from this table.
 

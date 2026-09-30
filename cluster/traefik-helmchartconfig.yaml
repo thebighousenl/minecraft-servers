@@ -21,3 +21,21 @@ spec:
         protocol: UDP
         expose:
           default: true
+      mc-kontgat:
+        port: 19134
+        exposedPort: 19134
+        protocol: UDP
+        expose:
+          default: true
+      mc-creative:
+        port: 19232
+        exposedPort: 19232
+        protocol: UDP
+        expose:
+          default: true
+      mc-plaskutje:
+        port: 19140
+        exposedPort: 19140
+        protocol: UDP
+        expose:
+          default: true

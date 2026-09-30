@@ -43,6 +43,7 @@ Server settings come only from env vars in `servers/<server>/patch.yaml`. The im
 ```bash
 tests/render-test.sh              # renders all overlays, dry-runs against the cluster
 tests/restore-world-test.sh       # restore script validation
+tests/restore-world-cluster-test.sh  # restore script against the cluster (throwaway zz-rtest server)
 python3 -m unittest tests/test_raknet_ping.py
 ```
 
@@ -124,6 +125,8 @@ Steps:
    scripts/restore-world.sh --dry-run <server> "<backup>/serverfiles/worlds/<world>"
    scripts/restore-world.sh <server> "<backup>/serverfiles/worlds/<world>"
    ```
+   If the script reports an empty `level.dat`, copy the world folder somewhere else (keep its
+   name), run `cp level.dat_old level.dat` inside the copy, and restore from the copy.
 5. **Apply everything:**
    ```bash
    kubectl apply -f cluster/traefik-helmchartconfig.yaml
@@ -150,9 +153,13 @@ kubectl -n minecraft-servers logs -f deploy/bedrock-<server>
 kubectl -n minecraft-servers rollout restart deploy/bedrock-<server>
 ```
 
-**Console:** `kubectl -n minecraft-servers attach -it deploy/bedrock-<server>`, type commands such
-as `list` or `op <player>`. Detach with `Ctrl-P Ctrl-Q`. `Ctrl-C` stops the server; it then
-restarts.
+**Server commands:** run console commands such as `list` or `op <player>` with the image's
+`send-command` helper; the output appears in the logs:
+
+```bash
+kubectl -n minecraft-servers exec deploy/bedrock-<server> -- send-command list
+kubectl -n minecraft-servers logs --tail=5 deploy/bedrock-<server>
+```
 
 **Updating Bedrock:** `rollout restart` pulls the latest image and server version.
 

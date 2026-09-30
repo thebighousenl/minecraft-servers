@@ -42,6 +42,11 @@ overlay="$REPO_ROOT/servers/$server"
   echo "Not a Bedrock world (missing level.dat or db/): $world_dir" >&2
   exit 1
 }
+[[ -s "$world_dir/level.dat" ]] || {
+  echo "level.dat is empty in $world_dir. If level.dat_old is intact, restore from a copy of the" >&2
+  echo "world where level.dat_old is copied over level.dat." >&2
+  exit 1
+}
 
 world_name="$(basename "$world_dir")"
 level_name="$(kubectl kustomize "$overlay" |
@@ -71,17 +76,18 @@ kc get pvc "$pvc" >/dev/null 2>&1 || {
   exit 1
 }
 
-had_deploy=false
-if kc get deploy "$deploy" >/dev/null 2>&1; then
-  had_deploy=true
-  echo "Scaling $deploy to 0"
-  kc scale deploy "$deploy" --replicas=0
-  kc wait --for=delete pod -l "app.kubernetes.io/instance=$server" --timeout=180s
-fi
-
-cleanup() { kc delete pod "$helper" --ignore-not-found --wait=false >/dev/null 2>&1 || true; }
+scaled_down=false
+cleanup() {
+  kc delete pod "$helper" --ignore-not-found --wait=false >/dev/null 2>&1 || true
+  if $scaled_down; then
+    echo "Scaling $deploy back to 1"
+    kc scale deploy "$deploy" --replicas=1 >/dev/null || true
+  fi
+}
 trap cleanup EXIT
 
+# The helper can mount the RWO volume next to a running server: local-path is single-node.
+kc delete pod "$helper" --ignore-not-found --wait=true >/dev/null
 echo "Starting helper pod $helper"
 kc run "$helper" --image="$HELPER_IMAGE" --restart=Never --overrides="$(cat <<JSON
 {
@@ -100,30 +106,39 @@ JSON
 kc wait --for=condition=Ready "pod/$helper" --timeout=180s
 
 if kc exec "$helper" -- test -e "$target"; then
-  if $force; then
-    echo "Replacing existing world at $target (--force)"
-    kc exec "$helper" -- rm -rf "$target"
-  else
+  if ! $force; then
     echo "A world already exists at $target. Rerun with --force to replace it." >&2
     exit 1
   fi
+  echo "Will replace existing world at $target (--force)"
 fi
 
-echo "Copying '$world_dir' to $target"
-kc exec "$helper" -- mkdir -p /data/worlds
+if kc get deploy "$deploy" >/dev/null 2>&1; then
+  echo "Scaling $deploy to 0"
+  scaled_down=true
+  kc scale deploy "$deploy" --replicas=0
+  kc wait --for=delete pod -l "app.kubernetes.io/instance=$server,app.kubernetes.io/name=bedrock" --timeout=180s
+fi
+
+# Copy into a staging directory first, so a failed copy never touches the existing world.
+staging="/data/worlds/.restore-tmp"
+echo "Copying '$world_dir' to $staging"
+kc exec "$helper" -- sh -c "rm -rf '$staging' /data/worlds/.restore-old && mkdir -p '$staging'"
 COPYFILE_DISABLE=1 tar --no-mac-metadata -C "$(dirname "$world_dir")" -cf - "$world_name" |
-  kc exec -i "$helper" -- tar -xf - -C /data/worlds
-kc exec "$helper" -- sh -c 'chown -R "$(stat -c %u:%g /data)" /data/worlds'
-kc exec "$helper" -- test -f "$target/level.dat"
-echo "Copied. Contents:"
+  kc exec -i "$helper" -- tar -xf - -C "$staging"
+kc exec "$helper" -- test -s "$staging/$world_name/level.dat"
+
+echo "Moving world into place at $target"
+kc exec "$helper" -- sh -c '
+  set -e
+  if [ -e "$1" ]; then mv "$1" /data/worlds/.restore-old; fi
+  mv "$2" "$1"
+  rm -rf /data/worlds/.restore-old "$3"
+  chown -R "$(stat -c %u:%g /data)" /data/worlds
+' sh "$target" "$staging/$world_name" "$staging"
+echo "Restored. Contents:"
 kc exec "$helper" -- ls -la "$target"
 
-cleanup
-trap - EXIT
-
-if $had_deploy; then
-  echo "Scaling $deploy back to 1"
-  kc scale deploy "$deploy" --replicas=1
-else
+if ! $scaled_down; then
   echo "Done. Now deploy the server: kubectl apply -k servers/$server"
 fi

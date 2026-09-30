@@ -21,18 +21,20 @@ expect() { # expect <description> <expected-exit> <expected-output-substring> --
   fi
 }
 
-make_world() { mkdir -p "$1/db"; touch "$1/level.dat"; }
+make_world() { mkdir -p "$1/db"; echo nbt > "$1/level.dat"; }
 
 make_world "$tmp/Daan"
 make_world "$tmp/Wrong"
 make_world "$tmp/with space/Daan"
 mkdir -p "$tmp/NotAWorld"
+mkdir -p "$tmp/empty/Daan/db"; touch "$tmp/empty/Daan/level.dat"
 
 expect "no args is usage error" 2 "Usage:" -- "$SCRIPT"
 expect "unknown option" 2 "Unknown option" -- "$SCRIPT" --bogus daan "$tmp/Daan"
 expect "unknown server" 1 "No overlay at servers/nope" -- "$SCRIPT" --dry-run nope "$tmp/Daan"
 expect "not a world" 1 "Not a Bedrock world" -- "$SCRIPT" --dry-run daan "$tmp/NotAWorld"
 expect "missing dir" 1 "Not a Bedrock world" -- "$SCRIPT" --dry-run daan "$tmp/missing"
+expect "empty level.dat" 1 "level.dat is empty" -- "$SCRIPT" --dry-run daan "$tmp/empty/Daan"
 expect "level name mismatch" 1 "does not match LEVEL_NAME 'Daan'" -- "$SCRIPT" --dry-run daan "$tmp/Wrong"
 expect "valid dry run" 0 "would copy" -- "$SCRIPT" --dry-run daan "$tmp/Daan"
 expect "valid dry run targets world dir" 0 "/data/worlds/Daan" -- "$SCRIPT" --dry-run daan "$tmp/Daan"

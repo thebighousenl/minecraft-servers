@@ -24,7 +24,7 @@ spec:
             - name: ONLINE_MODE
               value: "true"
             - name: ALLOW_LIST_USERS
-              value: DecidingTiara99:2535442332074978,PancakeNL8261:2533274926013414,Gjdeb:2533274863407504,BeastSqueez:2535444807168366
+              value: DecidingTiara99:2535442332074978,PancakeNL8261:2533274926013414,Gjdeb:2533274863407504,BeastSqueez:2535444807168366,NukePancakeLapt:2535457904060356
             - name: DEFAULT_PLAYER_PERMISSION_LEVEL
               value: operator
             - name: LEVEL_SEED
